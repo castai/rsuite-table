@@ -41,65 +41,6 @@ import 'rsuite/Stack/styles/index.less';
 import 'rsuite/Divider/styles/index.less';
 import './less/index.less';
 
-function App() {
-  return (
-    <Grid>
-      <h1>rsuite-table</h1>
-      <p>A React table component</p>
-      <p>
-        <a href="https://github.com/rsuite/rsuite-table">https://github.com/rsuite/rsuite-table</a>
-      </p>
-      <hr />
-      <Examples
-        dependencies={{
-          Checkbox,
-          Button,
-          ButtonGroup,
-          Popover,
-          Whisper,
-          Toggle,
-          fakeData,
-          fakeTreeData,
-          fakeBigTreeData,
-          fakeLargeData,
-          fakeDataForColSpan,
-          fakeDataForRowSpan,
-          Table,
-          Column,
-          ColumnGroup,
-          Cell,
-          HeaderCell,
-          FooterCell,
-          clone,
-          createFakeRowObjectData,
-          fakeObjectDataListStore,
-          isFunction,
-          get,
-          without,
-          useDrag,
-          useDrop,
-          Backend,
-          DndProvider,
-          GearIcon,
-          Profiler
-        }}
-        list={[
-          {
-            title: 'Virtualized',
-            content: require('./md/Virtualized.md')
-          },
-          {
-            title: 'Fixed Column',
-            content: require('./md/FixedColumnTable.md')
-          },
-          {
-            title: 'Automatic height',
-            content: require('./md/AutoHeightTable.md')
-          },
-          {
-            title: 'Fill height',
-            content: require('./md/FillHeightTable.md')
-          },
 const dependencies = {
   Checkbox,
   Button,
@@ -118,6 +59,7 @@ const dependencies = {
   ColumnGroup,
   Cell,
   HeaderCell,
+  FooterCell,
   clone,
   createFakeRowObjectData,
   fakeObjectDataListStore,
@@ -247,8 +189,8 @@ const examples = [
     content: require('./examples/UpdateData.md')
   },
   {
-    title: 'Table with footer',
-    content: require('./md/TableWithFooter.md')
+    title: 'Footer',
+    content: require('./examples/TableWithFooter.md')
   }
 ];
 

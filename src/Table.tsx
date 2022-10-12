@@ -890,7 +890,6 @@ const Table = React.forwardRef((props: TableProps, ref) => {
         onScroll={onScrollVertical}
         ref={scrollbarYRef}
         style={{ bottom: 0 }}
-        // style={footerHeight ? { bottom: footerHeight } : undefined}
       />
     );
   };
@@ -1053,7 +1052,7 @@ const Table = React.forwardRef((props: TableProps, ref) => {
           addPrefix={prefix}
           loading={!!visibleRows.current?.length || loading}
         />
-        {renderScrollbar()}
+        {renderVerticalScrollbar()}
         <Loader
           locale={locale}
           loadAnimation={loadAnimation}

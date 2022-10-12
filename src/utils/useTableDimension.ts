@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect, useState } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import getWidth from 'dom-lib/getWidth';
 import getHeight from 'dom-lib/getHeight';
 import getOffset from 'dom-lib/getOffset';
@@ -105,8 +105,6 @@ const useTableDimension = (props: TableDimensionProps) => {
       nextContentHeight - (affixHeader ? headerHeight * 2 : headerHeight)
     );
 
-
-
     // Whether to show the horizontal scroll bar
     const hasHorizontalScrollbar = contentWidth.current > tableWidth.current;
 
@@ -124,7 +122,8 @@ const useTableDimension = (props: TableDimensionProps) => {
        *  But it will only be calculated when there is a horizontal scroll bar (contentWidth > tableWidth).
        */
       minScrollY.current =
-        -(nextContentHeight - tableHeightWithoutFooter) - (hasHorizontalScrollbar ? SCROLLBAR_WIDTH : 0);
+        -(nextContentHeight - tableHeightWithoutFooter) -
+        (hasHorizontalScrollbar ? SCROLLBAR_WIDTH : 0);
     }
 
     // If the height of the content area is less than the height of the table, the vertical scroll bar is reset.
@@ -135,14 +134,15 @@ const useTableDimension = (props: TableDimensionProps) => {
       setEmptySpaceBelow(0);
     }
 
-    // If the value of scrollTop is greater than the scrollable range, the vertical scroll bar is reset.
-    // When Table is set to virtualized, the logic will be entered every time the wheel event is triggered
-    // to avoid resetting the scroll bar after scrolling to the bottom, so add the SCROLLBAR_WIDTH value.
-    if (
-      Math.abs(scrollY.current) + tableHeightWithoutFooter - headerHeight >
-      nextContentHeight + SCROLLBAR_WIDTH
-    ) {
-      onTableScroll?.({ y: scrollY.current });
+    // // If the value of scrollTop is greater than the scrollable range, the vertical scroll bar is reset.
+    // // When Table is set to virtualized, the logic will be entered every time the wheel event is triggered
+    // // to avoid resetting the scroll bar after scrolling to the bottom, so add the SCROLLBAR_WIDTH value.
+    // if (
+    //   Math.abs(scrollY.current) + tableHeightWithoutFooter - headerHeight >
+    //   nextContentHeight + SCROLLBAR_WIDTH
+    // ) {
+    //   onTableScroll?.({ y: scrollY.current });
+    // }
     const currentScrollTop = Math.abs(scrollY.current);
 
     // When Table is set to virtualized, the logic will be entered every time the wheel event is
@@ -243,7 +243,7 @@ const useTableDimension = (props: TableDimensionProps) => {
       if (nextHeight) {
         tableHeight.current = nextHeight;
       } else if (tableRef?.current) {
-        tableHeight.current = getHeight(tableRef.current.parentNode as Element);
+        tableHeight.current = getHeight(tableRef.current.parentNode?.parentNode as Element);
       }
 
       if (prevHeight && prevHeight !== tableHeight.current) {
