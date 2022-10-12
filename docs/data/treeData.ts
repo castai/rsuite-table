@@ -30,7 +30,16 @@ baseData.forEach(item => {
       name: faker.animal?.[item.name]?.(),
       status: faker.datatype?.boolean() ? 'ENABLED' : 'DISABLED',
       count: faker.datatype?.number(),
-      country: faker.address?.country()
+      country: faker.address?.country(),
+      children: [
+        {
+          key: `${item.key}-${k}`,
+          name: faker.animal?.[item.name]?.(),
+          status: faker.datatype?.boolean() ? 'ENABLED' : 'DISABLED',
+          count: faker.datatype?.number(),
+          country: faker.address?.country()
+        }
+      ]
     };
   });
 });

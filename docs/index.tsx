@@ -191,6 +191,10 @@ const examples = [
   {
     title: 'Footer',
     content: require('./examples/TableWithFooter.md')
+  },
+  {
+    title: 'Tree table with footer',
+    content: require('./examples/TreeTableWithFooter.md')
   }
 ];
 

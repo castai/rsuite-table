@@ -109,7 +109,7 @@ const Cell = React.forwardRef((props: InnerCellProps, ref: React.Ref<HTMLDivElem
   const isTreeCol = treeCol || (!hasCustomTreeCol && firstColumn && isTree);
   const cellHeight = typeof height === 'function' ? height(rowData) : height;
 
-  if (isTreeCol && !isHeaderCell && !rowData) {
+  if (isTreeCol && !isHeaderCell && !isFooterCell && !rowData) {
     throw new Error('[Table.Cell]: `rowData` is required for tree column');
   }
 
