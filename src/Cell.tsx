@@ -22,7 +22,7 @@ export interface CellProps extends StandardProps {
   rowData?: any;
 }
 
-export interface InnerCellProps extends CellProps {
+export interface InnerCellProps extends Omit<CellProps, 'children'> {
   align?: 'left' | 'center' | 'right';
   verticalAlign?: 'top' | 'middle' | 'bottom';
   isHeaderCell?: boolean;
@@ -40,7 +40,7 @@ export interface InnerCellProps extends CellProps {
   rowKey?: string | number;
   rowSpan?: number;
   depth?: number;
-  wordWrap?: boolean;
+  wordWrap?: boolean | 'break-all' | 'break-word' | 'keep-all';
   removed?: boolean;
   treeCol?: boolean;
   expanded?: boolean;
@@ -109,6 +109,10 @@ const Cell = React.forwardRef((props: InnerCellProps, ref: React.Ref<HTMLDivElem
   const isTreeCol = treeCol || (!hasCustomTreeCol && firstColumn && isTree);
   const cellHeight = typeof height === 'function' ? height(rowData) : height;
 
+  if (isTreeCol && !isHeaderCell && !rowData) {
+    throw new Error('[Table.Cell]: `rowData` is required for tree column');
+  }
+
   const handleTreeToggle = useCallback(
     (event: React.MouseEvent) => {
       onTreeToggle?.(rowKey, rowIndex, rowData, event);
@@ -154,6 +158,11 @@ const Cell = React.forwardRef((props: InnerCellProps, ref: React.Ref<HTMLDivElem
   if (verticalAlign) {
     contentStyles.display = 'table-cell';
     contentStyles.verticalAlign = verticalAlign;
+  }
+
+  if (wordWrap) {
+    contentStyles.wordBreak = typeof wordWrap === 'boolean' ? 'break-all' : wordWrap;
+    contentStyles.overflowWrap = wordWrap === 'break-word' ? wordWrap : undefined;
   }
 
   let cellContent = isNil(children) && rowData && dataKey ? get(rowData, dataKey) : children;
@@ -247,7 +256,7 @@ Cell.propTypes = {
   onTreeToggle: PropTypes.func,
   renderTreeToggle: PropTypes.func,
   renderCell: PropTypes.func,
-  wordWrap: PropTypes.bool,
+  wordWrap: PropTypes.any,
   removed: PropTypes.bool,
   treeCol: PropTypes.bool,
   expanded: PropTypes.bool

@@ -7,8 +7,8 @@ import { RowDataType, RowKeyType } from '../@types/common';
 
 interface TableRowsProps {
   prefix: (str: string) => string;
-  wordWrap: boolean | undefined;
-  data: RowDataType[];
+  wordWrap?: boolean | 'break-all' | 'break-word' | 'keep-all';
+  data: readonly RowDataType[];
   expandedRowKeys: RowKeyType[];
 }
 

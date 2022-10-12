@@ -11,6 +11,7 @@ import { SCROLLBAR_WIDTH, TRANSITION_DURATION, BEZIER } from '../constants';
 import type { ScrollbarInstance } from '../Scrollbar';
 import type { ListenerCallback, RowDataType } from '../@types/common';
 import isSupportTouchEvent from './isSupportTouchEvent';
+import flushSync from './flushSync';
 
 // Inertial sliding start time threshold
 const momentumTimeThreshold = 300;
@@ -20,7 +21,7 @@ const momentumYThreshold = 15;
 
 interface ScrollListenerProps {
   rtl: boolean;
-  data: RowDataType[];
+  data: readonly RowDataType[];
   height: number;
   getTableHeight: () => number;
   contentHeight: React.MutableRefObject<number>;
@@ -133,7 +134,7 @@ const useScrollListener = (props: ScrollListenerProps) => {
 
   const shouldHandleWheelY = useCallback(
     (delta: number) => {
-      if (delta === 0 || disabledScroll || loading) {
+      if (delta === 0 || disabledScroll || loading || autoHeight) {
         return false;
       }
 
@@ -143,12 +144,15 @@ const useScrollListener = (props: ScrollListenerProps) => {
         );
       }
     },
-    [disabledScroll, loading, minScrollY, scrollY]
+    [autoHeight, disabledScroll, loading, minScrollY, scrollY]
   );
 
   const debounceScrollEndedCallback = useCallback(() => {
     disableEventsTimeoutId.current = null;
-    setScrolling(false);
+
+    // Forces the end of scrolling to be prioritized so that virtualized long lists can update rendering.
+    // There will be no scrolling white screen.
+    flushSync(() => setScrolling(false));
   }, []);
 
   /**
@@ -176,12 +180,15 @@ const useScrollListener = (props: ScrollListenerProps) => {
 
       setScrollX(x);
       setScrollY(y);
+
       onScroll?.(Math.abs(x), Math.abs(y));
 
       if (virtualized) {
         // Add a state to the table during virtualized scrolling.
         // Make it set CSS `pointer-events:none` on the DOM to avoid wrong event interaction.
+
         setScrolling(true);
+
         if (disableEventsTimeoutId.current) {
           cancelAnimationTimeout(disableEventsTimeoutId.current);
         }
@@ -207,6 +214,7 @@ const useScrollListener = (props: ScrollListenerProps) => {
 
         return;
       }
+
       forceUpdatePosition(momentumOptions?.duration, momentumOptions?.bezier);
     },
     [
@@ -408,10 +416,13 @@ const useScrollListener = (props: ScrollListenerProps) => {
     const [nextScrollY, handleScrollY] = getControlledScrollTopValue(top);
     const height = getTableHeight();
 
+    if (!loading && nextScrollY !== scrollY.current) {
+      onScroll?.(Math.abs(scrollX.current), Math.abs(nextScrollY));
+    }
+
     setScrollY(nextScrollY);
     scrollbarYRef?.current?.resetScrollBarPosition?.(handleScrollY);
     forceUpdatePosition();
-    !loading && onScroll?.(Math.abs(scrollX.current), Math.abs(nextScrollY));
 
     /**
      * After calling `scrollTop`, a white screen will appear when `virtualized` is true.

@@ -1,33 +1,58 @@
-### Automatic height
+### Loading
 
 <!--start-code-->
 
 ```js
 const App = () => {
-  const [size, setSize] = React.useState(fakeData.length);
-  const handleChange = event => {
-    const value = event.target.value;
-    setSize(value);
+  const [data, setData] = React.useState(fakeData);
+  const [loading, setLoading] = React.useState(true);
+  const [customLoader, setCustomLoader] = React.useState(false);
+  const [loadAnimation, setLoadAnimation] = React.useState(false);
+  const renderLoading = () => {
+    return <Loader center backdrop content="Custom Loader" />;
   };
-
-  const data = fakeData.filter((item, index) => index < size);
   return (
     <div>
-      size: <input type="text" onChange={handleChange} value={size} />
-      <Table
-        height={400}
-        autoHeight
-        data={data}
-        onRowClick={data => {
-          console.log(data);
+      <Checkbox
+        checked={loading}
+        onChange={() => {
+          setLoading(!loading);
         }}
+      >
+        loading
+      </Checkbox>
+
+      <Checkbox
+        checked={customLoader}
+        onChange={() => {
+          setCustomLoader(!customLoader);
+        }}
+      >
+        Use a custom loader
+      </Checkbox>
+
+      <Checkbox
+        checked={loadAnimation}
+        onChange={() => {
+          setLoadAnimation(!loadAnimation);
+        }}
+      >
+        loadAnimation
+      </Checkbox>
+
+      <Table
+        loading={loading}
+        height={500}
+        data={data}
+        loadAnimation={loadAnimation}
+        renderLoading={customLoader ? renderLoading : null}
       >
         <Column width={70} align="center" fixed>
           <HeaderCell>Id</HeaderCell>
           <Cell dataKey="id" />
         </Column>
 
-        <Column width={130}>
+        <Column width={130} fixed>
           <HeaderCell>First Name</HeaderCell>
           <Cell dataKey="firstName" />
         </Column>
@@ -67,7 +92,7 @@ const App = () => {
           <Cell dataKey="email" />
         </Column>
 
-        <Column width={200} fixed="right">
+        <Column width={200}>
           <HeaderCell>Email</HeaderCell>
           <Cell dataKey="email" />
         </Column>
@@ -75,6 +100,7 @@ const App = () => {
     </div>
   );
 };
+
 ReactDOM.render(<App />);
 ```
 

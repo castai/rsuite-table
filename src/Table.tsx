@@ -3,6 +3,7 @@ import { getTranslateDOMPositionXY } from 'dom-lib/translateDOMPositionXY';
 import PropTypes from 'prop-types';
 import isFunction from 'lodash/isFunction';
 import flatten from 'lodash/flatten';
+import debounce from 'lodash/debounce';
 import Row, { RowProps } from './Row';
 import CellGroup from './CellGroup';
 import Scrollbar, { ScrollbarInstance } from './Scrollbar';
@@ -42,7 +43,8 @@ import type {
   SortType,
   RowDataType,
   RowKeyType,
-  TableLocaleType
+  TableLocaleType,
+  TableSizeChangeEventName
 } from './@types/common';
 /**
  * Filter those expanded nodes.
@@ -51,7 +53,11 @@ import type {
  * @param rowKey
  * @returns
  */
-const filterTreeData = (data: any[], expandedRowKeys: RowKeyType[], rowKey?: RowKeyType) => {
+const filterTreeData = (
+  data: readonly any[],
+  expandedRowKeys: RowKeyType[],
+  rowKey?: RowKeyType
+) => {
   return flattenData(data).filter(rowData => {
     if (rowKey) {
       const parents = findAllParents(rowData, rowKey);
@@ -103,7 +109,7 @@ export interface TableProps extends Omit<StandardProps, 'onScroll'> {
   defaultExpandedRowKeys?: RowKeyType[];
 
   /** Table data */
-  data?: RowDataType[];
+  data?: readonly RowDataType[];
 
   /** Specify the default expanded row by  rowkey (Controlled) */
   expandedRowKeys?: RowKeyType[];
@@ -159,7 +165,7 @@ export interface TableProps extends Omit<StandardProps, 'onScroll'> {
    */
   shouldUpdateScroll?:
     | boolean
-    | ((event: 'bodyHeightChanged' | 'bodyWidthChanged' | 'widthChanged') => {
+    | ((event: TableSizeChangeEventName) => {
         x?: number;
         y?: number;
       });
@@ -173,8 +179,11 @@ export interface TableProps extends Omit<StandardProps, 'onScroll'> {
   /** The width of the table. When it is not set, it will adapt according to the container */
   width?: number;
 
-  /** The cell wraps automatically */
-  wordWrap?: boolean;
+  /**
+   * Whether to appear line breaks where text overflows its content box
+   * https://developer.mozilla.org/en-US/docs/Web/CSS/word-break
+   */
+  wordWrap?: boolean | 'break-all' | 'break-word' | 'keep-all';
 
   /** Effectively render large tabular data */
   virtualized?: boolean;
@@ -251,7 +260,7 @@ const Table = React.forwardRef((props: TableProps, ref) => {
   const {
     affixHeader,
     children,
-    classPrefix,
+    classPrefix = 'rs-table',
     className,
     data: dataProp = DATA_PLACEHOLDER,
     defaultSortType = SORT_TYPE.DESC as SortType,
@@ -315,7 +324,7 @@ const Table = React.forwardRef((props: TableProps, ref) => {
     withClassPrefix,
     merge: mergeCls,
     prefix
-  } = useClassNames(classPrefix || 'table', typeof classPrefix !== 'undefined');
+  } = useClassNames(classPrefix, typeof classPrefix !== 'undefined');
 
   // Use `forceUpdate` to force the component to re-render after manipulating the DOM.
   const [, forceUpdate] = useReducer(x => x + 1, 0);
@@ -372,12 +381,12 @@ const Table = React.forwardRef((props: TableProps, ref) => {
   const scrollbarXRef = useRef<ScrollbarInstance>(null);
   const scrollbarYRef = useRef<ScrollbarInstance>(null);
 
-  /**
-   * Reset the position of the scroll bar after the table size changes.
-   */
-  const resetScrollbar = (event: 'bodyHeightChanged' | 'bodyWidthChanged' | 'widthChanged') => {
+  const handleTableResizeChange = (_prevSize, event: TableSizeChangeEventName) => {
     forceUpdate();
 
+    /**
+     * Reset the position of the scroll bar after the table size changes.
+     */
     if (typeof shouldUpdateScroll === 'function') {
       onScrollTo(shouldUpdateScroll(event));
     } else if (shouldUpdateScroll) {
@@ -417,18 +426,9 @@ const Table = React.forwardRef((props: TableProps, ref) => {
     fillHeight,
     children,
     expandedRowKeys,
-    onTableScroll: (coords: { x?: number; y?: number }) => {
-      onScrollTo(coords);
-    },
-    onTableContentHeightChange: () => {
-      resetScrollbar('bodyHeightChanged');
-    },
-    onTableContentWidthChange: () => {
-      resetScrollbar('bodyWidthChanged');
-    },
-    onTableWidthChange: () => {
-      resetScrollbar('widthChanged');
-    }
+    showHeader,
+    onTableScroll: debounce((coords: { x?: number; y?: number }) => onScrollTo(coords), 100),
+    onTableResizeChange: handleTableResizeChange
   });
 
   useAffix({
@@ -517,6 +517,9 @@ const Table = React.forwardRef((props: TableProps, ref) => {
       sortColumn,
       prefix,
       onSortColumn,
+
+      // Force table update after column width change, so scrollbar re-renders.
+      onHeaderCellResize: forceUpdate,
       rowHeight
     });
 
@@ -545,6 +548,13 @@ const Table = React.forwardRef((props: TableProps, ref) => {
   }));
 
   const rowWidth = allColumnsWidth > tableWidth.current ? allColumnsWidth : tableWidth.current;
+
+  // Whether to show vertical scroll bar
+  const hasVerticalScrollbar =
+    !autoHeight && contentHeight.current > getTableHeight() - headerHeight;
+
+  // Whether to show the horizontal scroll bar
+  const hasHorizontalScrollbar = contentWidth.current > tableWidth.current;
 
   const classes = mergeCls(
     className,
@@ -637,6 +647,10 @@ const Table = React.forwardRef((props: TableProps, ref) => {
         }
       }
 
+      if (hasVerticalScrollbar && fixedRightCellGroupWidth) {
+        fixedRightCellGroupWidth += SCROLLBAR_WIDTH;
+      }
+
       rowNode = (
         <>
           {fixedLeftCellGroupWidth ? (
@@ -660,12 +674,14 @@ const Table = React.forwardRef((props: TableProps, ref) => {
               style={
                 rtl
                   ? { right: 0 - rowRight }
-                  : { left: tableWidth.current - fixedRightCellGroupWidth - SCROLLBAR_WIDTH }
+                  : { left: tableWidth.current - fixedRightCellGroupWidth }
               }
               height={props.isHeaderRow ? props.headerHeight : props.height}
-              width={fixedRightCellGroupWidth + SCROLLBAR_WIDTH}
+              width={fixedRightCellGroupWidth}
             >
-              {mergeCells(resetLeftForCells(fixedRightCells, SCROLLBAR_WIDTH))}
+              {mergeCells(
+                resetLeftForCells(fixedRightCells, hasVerticalScrollbar ? SCROLLBAR_WIDTH : 0)
+              )}
             </CellGroup>
           ) : null}
 
@@ -861,7 +877,7 @@ const Table = React.forwardRef((props: TableProps, ref) => {
 
   const renderVerticalScrollbar = () => {
     const height = getTableHeight();
-    if (disabledScroll) {
+    if (disabledScroll || !hasVerticalScrollbar) {
       return null;
     }
     return (
@@ -880,7 +896,7 @@ const Table = React.forwardRef((props: TableProps, ref) => {
   };
 
   const renderHorizontalScrollbar = () => {
-    if (disabledScroll) {
+    if (disabledScroll || !hasHorizontalScrollbar) {
       return null;
     }
     return (
@@ -1037,7 +1053,7 @@ const Table = React.forwardRef((props: TableProps, ref) => {
           addPrefix={prefix}
           loading={!!visibleRows.current?.length || loading}
         />
-        {renderVerticalScrollbar()}
+        {renderScrollbar()}
         <Loader
           locale={locale}
           loadAnimation={loadAnimation}
@@ -1051,13 +1067,13 @@ const Table = React.forwardRef((props: TableProps, ref) => {
 
   const contextValue = React.useMemo(
     () => ({
-      classPrefix: withClassPrefix(),
+      classPrefix,
       translateDOMPositionXY: translateDOMPositionXY.current,
       rtl,
       isTree,
       hasCustomTreeCol
     }),
-    [hasCustomTreeCol, isTree, rtl, withClassPrefix]
+    [classPrefix, hasCustomTreeCol, isTree, rtl]
   );
 
   const renderTableFooter = (width: number) => {
@@ -1166,7 +1182,7 @@ Table.propTypes = {
   showHeader: PropTypes.bool,
   shouldUpdateScroll: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
   translate3d: PropTypes.bool,
-  wordWrap: PropTypes.bool,
+  wordWrap: PropTypes.any,
   width: PropTypes.number,
   virtualized: PropTypes.bool,
   isTree: PropTypes.bool,

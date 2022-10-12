@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
 const webpackConfig = {
   mode: 'development',
   output: {
@@ -12,9 +15,33 @@ const webpackConfig = {
         test: [/\.tsx?$/, /\.jsx?$/],
         use: ['babel-loader?babelrc'],
         exclude: /node_modules/
+      },
+      {
+        test: /\.(less|css)$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader'
+          },
+          {
+            loader: 'less-loader',
+            options: {
+              sourceMap: true,
+              lessOptions: {
+                javascriptEnabled: true
+              }
+            }
+          }
+        ]
       }
     ]
   },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+      chunkFilename: '[id].css'
+    })
+  ],
   devtool: 'eval'
 };
 
@@ -32,7 +59,7 @@ module.exports = config => {
   config.set({
     basePath: '',
     files: [testFile],
-    frameworks: ['mocha', 'sinon-chai', 'webpack'],
+    frameworks: ['mocha', 'chai-dom', 'sinon-chai', 'webpack'],
     colors: true,
     reporters: ['mocha', 'coverage'],
 
@@ -57,6 +84,16 @@ module.exports = config => {
         }
       }
     },
+    plugins: [
+      'karma-webpack',
+      'karma-mocha',
+      'karma-mocha-reporter',
+      'karma-sinon-chai',
+      'karma-chai-dom',
+      'karma-coverage',
+      'karma-chrome-launcher',
+      'karma-firefox-launcher'
+    ],
     coverageReporter: {
       dir: 'coverage',
       reporters: [

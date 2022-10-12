@@ -135,6 +135,7 @@ const App = () => (
 | sortType                 | enum: 'desc', 'asc'                                                | Sort type (Controlled)                                                                                                              |
 | virtualized              | boolean                                                            | Effectively render large tabular data                                                                                               |
 | width                    | number                                                             | Table width                                                                                                                         |
+| wordWrap                 | boolean,'break-all','break-word','keep-all'                        | Whether to appear line breaks where text overflows its content box.                                                                 |
 
 ### `<Column>`
 
@@ -165,6 +166,13 @@ const App = () => (
 | groupHeaderHeight | number                          | The height of the header of the merged cell group. The default value is 50% of the table `headerHeight` |
 | header            | React.ReactNode                 | Group header                                                                                            |
 | verticalAlign     | enum: 'top', 'middle', 'bottom' | Vertical alignment                                                                                      |
+
+### `<HeaderCell>`
+
+| Property       | Type `(Default)`              | Description                                  |
+| -------------- | ----------------------------- | -------------------------------------------- |
+| children       | React.ReactNode               | The table column header displays the content |
+| renderSortIcon | (sortType) => React.ReactNode | Custom render sort icons on column headers   |
 
 ### `<Cell>`
 

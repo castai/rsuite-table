@@ -9,6 +9,8 @@ import HeaderCell from '../src/HeaderCell';
 import getHeight from 'dom-lib/getHeight';
 import getWidth from 'dom-lib/getWidth';
 
+import '../src/less/index.less';
+
 describe('Table', () => {
   it('Should output a table', () => {
     const instance = getDOMNode(<Table>test</Table>);
@@ -64,7 +66,7 @@ describe('Table', () => {
     assert.equal(instance.getAttribute('aria-busy'), 'true');
   });
 
-  it('Should render custom loading', () => {
+  it('Should render custom loader', () => {
     const instance = getDOMNode(
       <Table
         loading
@@ -79,6 +81,23 @@ describe('Table', () => {
       </Table>
     );
     assert.equal(instance.querySelector('.my-loading').innerText, 'loading');
+  });
+
+  it('Should not render custom loader', () => {
+    const instance = getDOMNode(
+      <Table
+        loading={false}
+        renderLoading={() => {
+          return <p className="my-loading">loading</p>;
+        }}
+      >
+        <Column>
+          <HeaderCell>11</HeaderCell>
+          <Cell>12</Cell>
+        </Column>
+      </Table>
+    );
+    assert.isNull(instance.querySelector('.my-loading'));
   });
 
   it('Should render custom empty info', () => {
@@ -162,7 +181,9 @@ describe('Table', () => {
 
     const table = ref.current.root;
     const cell = table.querySelectorAll('.rs-table-cell')[1];
+    const cellContent = table.querySelectorAll('.rs-table-cell-content')[1];
 
+    assert.equal(cellContent.style.wordBreak, 'break-all');
     assert.include(ref.current.root.className, 'rs-table-word-wrap');
 
     setTimeout(() => {
@@ -170,6 +191,60 @@ describe('Table', () => {
       assert.equal(cell.innerText, 'South Georgia and the South Sandwich Islands');
       done();
     }, 1);
+  });
+
+  it('Should be wordWrap=break-all', () => {
+    const ref = React.createRef();
+    render(
+      <Table
+        wordWrap="break-all"
+        data={[{ id: 1, country: 'South Georgia and the South Sandwich Islands' }]}
+      >
+        <Column width={20}>
+          <HeaderCell>Country</HeaderCell>
+          <Cell dataKey="country" ref={ref} />
+        </Column>
+      </Table>
+    );
+
+    const cellContent = ref.current.querySelector('.rs-table-cell-content');
+    assert.equal(cellContent.style.wordBreak, 'break-all');
+  });
+
+  it('Should be wordWrap=break-word', () => {
+    const ref = React.createRef();
+    render(
+      <Table
+        wordWrap="break-word"
+        data={[{ id: 1, country: 'South Georgia and the South Sandwich Islands' }]}
+      >
+        <Column width={20}>
+          <HeaderCell>Country</HeaderCell>
+          <Cell dataKey="country" ref={ref} />
+        </Column>
+      </Table>
+    );
+
+    const cellContent = ref.current.querySelector('.rs-table-cell-content');
+    assert.equal(cellContent.style.wordBreak, 'break-word');
+  });
+
+  it('Should be wordWrap=keep-all', () => {
+    const ref = React.createRef();
+    render(
+      <Table
+        wordWrap="keep-all"
+        data={[{ id: 1, country: 'South Georgia and the South Sandwich Islands' }]}
+      >
+        <Column width={20}>
+          <HeaderCell>Country</HeaderCell>
+          <Cell dataKey="country" ref={ref} />
+        </Column>
+      </Table>
+    );
+
+    const cellContent = ref.current.querySelector('.rs-table-cell-content');
+    assert.equal(cellContent.style.wordBreak, 'keep-all');
   });
 
   it('Should be wordWrap when isTree', done => {
@@ -239,29 +314,48 @@ describe('Table', () => {
       <Table
         autoHeight
         data={[
-          {
-            id: 1,
-            name: 'a'
-          },
-          {
-            id: 2,
-            name: 'b'
-          }
+          { id: 1, name: 'a' },
+          { id: 2, name: 'b' }
         ]}
       >
         <Column>
-          <HeaderCell>11</HeaderCell>
-          <Cell>12</Cell>
+          <HeaderCell>id</HeaderCell>
+          <Cell dataKey="id" />
         </Column>
         <Column>
-          <HeaderCell>11</HeaderCell>
-          <Cell>12</Cell>
+          <HeaderCell>name</HeaderCell>
+          <Cell dataKey="name" />
         </Column>
       </Table>
     );
     // 2 rows + header row
     const height = 46 * 2 + 40;
-    assert.equal(instance.style.height, `${height}px`);
+    expect(instance).to.style('height', height + 'px');
+  });
+
+  it('Should be automatic height when there is a horizontal scroll bar', () => {
+    const instance = getDOMNode(
+      <Table
+        autoHeight
+        width={100}
+        data={[
+          { id: 1, name: 'a' },
+          { id: 2, name: 'b' }
+        ]}
+      >
+        <Column>
+          <HeaderCell>id</HeaderCell>
+          <Cell dataKey="id" />
+        </Column>
+        <Column>
+          <HeaderCell>name</HeaderCell>
+          <Cell dataKey="name" />
+        </Column>
+      </Table>
+    );
+    // 2 rows + header row + scrollbar
+    const height = 46 * 2 + 40 + 10;
+    expect(instance).to.style('height', height + 'px');
   });
 
   // https://github.com/rsuite/rsuite-table/issues/300
@@ -796,7 +890,7 @@ describe('Table', () => {
     const ref = React.createRef();
 
     render(
-      <Table ref={ref} isTree data={data} showHeader={false} rowKey="name">
+      <Table ref={ref} isTree data={data} showHeader={false} rowKey="name" height={100}>
         <Column>
           <HeaderCell>name</HeaderCell>
           <Cell dataKey="name" />
@@ -809,7 +903,7 @@ describe('Table', () => {
 
     // Before the Tree expands, it displays 1 row without vertical scroll bar.
     assert.equal(table.querySelectorAll('.rs-table-row').length, 1);
-    assert.isNotNull(table.querySelector('.rs-table-scrollbar-vertical.rs-table-scrollbar-hide'));
+    assert.isNull(table.querySelector('.rs-table-scrollbar-vertical'));
 
     act(() => {
       Simulate.click(expand);
@@ -817,7 +911,7 @@ describe('Table', () => {
 
     // After the Tree is expanded, 10 rows are displayed and a vertical scroll bar is displayed at the same time.
     assert.equal(table.querySelectorAll('.rs-table-row').length, 10);
-    assert.isNull(table.querySelector('.rs-table-scrollbar-vertical.rs-table-scrollbar-hide'));
+    assert.isNotNull(table.querySelector('.rs-table-scrollbar-vertical'));
   });
 
   it('Should render 2 ColumnGroup', () => {
@@ -1227,10 +1321,12 @@ describe('Table', () => {
     });
 
     const instance = getInstance(<App />);
+
     expect(onScrollSpy.callCount).to.equal(1);
     expect(onScrollSpy.firstCall.firstArg).to.equal('bodyHeightChanged');
 
     instance.updateWidth();
+
     expect(onScrollSpy.callCount).to.equal(2);
     expect(onScrollSpy.secondCall.firstArg).to.equal('widthChanged');
   });
@@ -1476,5 +1572,126 @@ describe('Table', () => {
     );
 
     assert.equal(instance.querySelector('.rs-table').style.height, '300px');
+  });
+
+  it('Should call shouldUpdateScroll after the height of the table container is changed', done => {
+    const onScrollSpy = sinon.spy(a => {
+      if (a === 'heightChanged') {
+        done();
+      }
+    });
+    const data = [
+      {
+        id: 1,
+        name: 'a'
+      }
+    ];
+    const App = React.forwardRef((props, ref) => {
+      const [height, setHeight] = React.useState(300);
+      const tableRef = React.useRef();
+      React.useImperativeHandle(ref, () => ({
+        get table() {
+          return tableRef.current?.root;
+        },
+        updateTableHeight: () => {
+          setHeight(400);
+        }
+      }));
+
+      return (
+        <div style={{ height }}>
+          <Table
+            ref={tableRef}
+            fillHeight
+            height={200}
+            data={data}
+            shouldUpdateScroll={onScrollSpy}
+          >
+            <Column>
+              <HeaderCell>11</HeaderCell>
+              <Cell>12</Cell>
+            </Column>
+            <Column>
+              <HeaderCell>11</HeaderCell>
+              <Cell>12</Cell>
+            </Column>
+          </Table>
+        </div>
+      );
+    });
+
+    const instance = getInstance(<App />);
+
+    assert.equal(instance.table.style.height, '300px');
+
+    instance.updateTableHeight();
+
+    assert.equal(onScrollSpy.callCount, 2);
+    assert.equal(onScrollSpy.secondCall.firstArg, 'heightChanged');
+    assert.equal(instance.table.style.height, '400px');
+  });
+
+  it('Should not render scrollbars', () => {
+    const instance = getDOMNode(
+      <Table data={[{ name: 'name' }]} rowKey="name" height={100}>
+        <Column>
+          <HeaderCell>name</HeaderCell>
+          <Cell dataKey="name" />
+        </Column>
+      </Table>
+    );
+    assert.isNull(instance.querySelector('.rs-table-scrollbar'));
+  });
+
+  it('Should be to avoid nested classPrefix', () => {
+    const data = [{ id: 1, name: 'foobar' }];
+    const innerTable = React.createRef();
+
+    getDOMNode(
+      <Table
+        data={data}
+        rowKey="id"
+        expandedRowKeys={[1]}
+        renderRowExpanded={() => {
+          return (
+            <Table data={data} ref={innerTable}>
+              <Column width={130}>
+                <HeaderCell>inner name</HeaderCell>
+                <Cell dataKey="name" />
+              </Column>
+            </Table>
+          );
+        }}
+      >
+        <Column width={130}>
+          <HeaderCell>Name</HeaderCell>
+          <Cell dataKey="name" />
+        </Column>
+      </Table>
+    );
+
+    assert.equal(innerTable.current.root.className, 'rs-table rs-table-hover');
+  });
+
+  it('Should throw error for rowData check', () => {
+    expect(() => {
+      /**
+       * TODO:
+       * Should throw an error when rowData is not passed to Cell.
+       * But chai cannot catch errors inside React.
+       */
+      const TreeCell = ({ rowData, ...rest }) => {
+        return <Cell rowData={rowData} {...rest} />;
+      };
+
+      render(
+        <Table isTree rowKey="id" data={[{ id: 1, name: 'a' }]}>
+          <Column>
+            <HeaderCell>b</HeaderCell>
+            <TreeCell />
+          </Column>
+        </Table>
+      );
+    }).to.not.throw();
   });
 });

@@ -1,7 +1,11 @@
+### Update data
+
+Demonstrates updating the scrollbar position after the data is updated.
+
 <!--start-code-->
 
 ```js
-const fakeData = (length, start) => {
+const mockData = (length, start) => {
   const result = [];
   for (let i = 1; i <= length; i++) {
     result.push({
@@ -13,24 +17,13 @@ const fakeData = (length, start) => {
 };
 
 const App = () => {
-  const [dataNum, setDataNum] = React.useState(9000);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const data = React.useMemo(() => fakeData(dataNum, 0), [dataNum]);
+  const [dataNum, setDataNum] = React.useState(1000);
+  const data = React.useMemo(() => mockData(dataNum, 0), [dataNum]);
   console.log('currentDataLen', data.length, dataNum);
 
   return (
     <div>
-      <Table
-        width={300}
-        height={400}
-        data={data}
-        // 这个是bug复现的必要条件
-        virtualized={true}
-        // 这个是bug复现的必要条件
-        shouldUpdateScroll={false}
-        showHeader={false}
-        bordered
-      >
+      <Table width={300} height={400} data={data} virtualized shouldUpdateScroll={false} bordered>
         <Column width={200} align="center" flexGrow={1}>
           <HeaderCell>ID</HeaderCell>
           <Cell dataKey="index" />
@@ -46,7 +39,7 @@ const App = () => {
           setDataNum(Math.round(dataNum / 2));
         }}
       >
-        改变数据源
+        Change Data
       </Button>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect, useImperativeHandle } from 'react';
+import React, { useState, useRef, useCallback, useImperativeHandle } from 'react';
 import DOMMouseMoveTracker from 'dom-lib/DOMMouseMoveTracker';
 import addStyle, { CSSProperty } from 'dom-lib/addStyle';
 import getOffset from 'dom-lib/getOffset';
@@ -56,12 +56,7 @@ const Scrollbar = React.forwardRef((props: ScrollbarProps, ref) => {
   const { withClassPrefix, merge, prefix } = useClassNames(classPrefix);
   const classes = merge(
     className,
-    withClassPrefix({
-      vertical,
-      horizontal: !vertical,
-      hide: scrollLength <= length,
-      pressed: handlePressed
-    }),
+    withClassPrefix({ vertical, horizontal: !vertical, pressed: handlePressed }),
     // keep the 'fixed' class name if it has already been given by useAffix hook
     barRef.current?.classList.contains('fixed') && 'fixed'
   );
@@ -79,14 +74,11 @@ const Scrollbar = React.forwardRef((props: ScrollbarProps, ref) => {
         setBarOffset(getOffset(barRef.current));
       }
     }, 1);
-  });
 
-  useEffect(() => {
     return () => {
       releaseMouseMoves();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   useUpdateEffect(() => {
     if (scrollOffset.current) {
@@ -129,12 +121,15 @@ const Scrollbar = React.forwardRef((props: ScrollbarProps, ref) => {
           }
         : {};
 
+      const getSafeValue = (value = 0) => {
+        return Math.min(Math.max(value, 0), max);
+      };
+
       if (typeof forceDelta === 'undefined') {
         scrollOffset.current += delta;
-        scrollOffset.current = Math.max(scrollOffset.current, 0);
-        scrollOffset.current = Math.min(scrollOffset.current, max);
+        scrollOffset.current = getSafeValue(scrollOffset.current);
       } else {
-        scrollOffset.current = forceDelta || 0;
+        scrollOffset.current = getSafeValue(forceDelta);
       }
 
       if (vertical) {

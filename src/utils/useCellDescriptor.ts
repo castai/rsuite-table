@@ -28,6 +28,7 @@ interface CellDescriptorProps {
   sortColumn?: string;
   prefix: (str: string) => string;
   onSortColumn?: (dataKey: string, sortType?: SortType) => void;
+  onHeaderCellResize?: (width: number, dataKey: string) => void;
   rowHeight?: number | ((rowData?: RowDataType) => number);
   mouseAreaRef: React.RefObject<HTMLDivElement>;
   tableRef: React.RefObject<HTMLDivElement>;
@@ -65,6 +66,7 @@ const useCellDescriptor = (props: CellDescriptorProps): CellDescriptor => {
     sortColumn,
     rowHeight,
     onSortColumn,
+    onHeaderCellResize,
     prefix
   } = props;
 
@@ -95,6 +97,10 @@ const useCellDescriptor = (props: CellDescriptorProps): CellDescriptor => {
     clearCache();
   }, [children, sortColumn, sortType, tableWidth.current, scrollX.current, minScrollX.current]);
 
+  useUpdateEffect(() => {
+    columnWidths.current = {};
+  }, [children]);
+
   const handleColumnResizeEnd = useCallback(
     (columnWidth: number, _cursorDelta: number, dataKey: any, index: number) => {
       columnWidths.current[`${dataKey}_${index}_width`] = columnWidth;
@@ -106,8 +112,9 @@ const useCellDescriptor = (props: CellDescriptorProps): CellDescriptor => {
       }
 
       clearCache();
+      onHeaderCellResize?.(columnWidth, dataKey);
     },
-    [clearCache, mouseAreaRef, setColumnResizing]
+    [clearCache, mouseAreaRef, onHeaderCellResize, setColumnResizing]
   );
 
   const handleColumnResizeMove = useCallback(

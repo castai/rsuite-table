@@ -1,3 +1,93 @@
+## [5.7.2](https://github.com/rsuite/rsuite-table/compare/5.7.1...5.7.2) (2022-09-29)
+
+
+### Bug Fixes
+
+* **Loader:** fix custom loader always showing ([#370](https://github.com/rsuite/rsuite-table/issues/370)) ([1774eee](https://github.com/rsuite/rsuite-table/commit/1774eeef38b4195f1797e960ffdeb2592609629e))
+
+
+
+## [5.7.1](https://github.com/rsuite/rsuite-table/compare/5.7.0...5.7.1) (2022-09-07)
+
+
+### Bug Fixes
+
+* fixes an issue where the width of cells outputted from useCellDescriptor does not always update as columns in input change.' ([#364](https://github.com/rsuite/rsuite-table/issues/364)) ([cf1682d](https://github.com/rsuite/rsuite-table/commit/cf1682d836f1e5657db93e9ce4d8975dce760786))
+* **Table:** fix virtualized table scrolling exception ([#366](https://github.com/rsuite/rsuite-table/issues/366)) ([a0c1696](https://github.com/rsuite/rsuite-table/commit/a0c1696baf75f092d7b3c40368e9e7e0db61bbaa))
+
+
+
+# [5.7.0](https://github.com/rsuite/rsuite-table/compare/5.6.1...5.7.0) (2022-08-23)
+
+
+### Bug Fixes
+
+* **autoHeight:** fix table height calculation error when autoHeight ([#362](https://github.com/rsuite/rsuite-table/issues/362)) ([9cca913](https://github.com/rsuite/rsuite-table/commit/9cca913cd5aaf394fd657d0eb4c5435ec73c66b3))
+* **autoHeight:** fixed scroll event not updating after autoHeight value changed ([#360](https://github.com/rsuite/rsuite-table/issues/360)) ([bb368bd](https://github.com/rsuite/rsuite-table/commit/bb368bd213c8c1dc61327889a57aad2f7c6d1028))
+* **Cell:** add rowData required validation for custom Cell ([#361](https://github.com/rsuite/rsuite-table/issues/361)) ([fcab314](https://github.com/rsuite/rsuite-table/commit/fcab3144d9fadd9b643f887c7a306a8c85649113))
+
+
+### Features
+
+* adapt to react 18 ([#359](https://github.com/rsuite/rsuite-table/issues/359)) ([433e8d3](https://github.com/rsuite/rsuite-table/commit/433e8d317f0343757d4157dad4ff48a909c51278))
+
+
+
+## [5.6.1](https://github.com/rsuite/rsuite-table/compare/5.6.0...5.6.1) (2022-07-12)
+
+
+### Bug Fixes
+
+* add debounce to onScroll ([#352](https://github.com/rsuite/rsuite-table/issues/352)) ([793c830](https://github.com/rsuite/rsuite-table/commit/793c830d599a7844c18e635115bf45272baf5059))
+
+
+
+# [5.6.0](https://github.com/rsuite/rsuite-table/compare/5.5.1...5.6.0) (2022-06-27)
+
+
+### Bug Fixes
+
+* **Table:** fix classPrefix bug due to context parameter ([#349](https://github.com/rsuite/rsuite-table/issues/349)) ([cf875f5](https://github.com/rsuite/rsuite-table/commit/cf875f5c715419e790fc0338c22f8804ded1b962))
+
+
+### Features
+
+* **Table:** add support for wordWrap property values ([#348](https://github.com/rsuite/rsuite-table/issues/348)) ([f6f65c1](https://github.com/rsuite/rsuite-table/commit/f6f65c1ef4682926f57e198127b3cb9b692b4ab8))
+
+
+
+## [5.5.1](https://github.com/rsuite/rsuite-table/compare/5.5.0...5.5.1) (2022-06-01)
+
+
+### Bug Fixes
+
+* rowHeight using is fixed in useTableDimension ([#343](https://github.com/rsuite/rsuite-table/issues/343)) ([6fb5a69](https://github.com/rsuite/rsuite-table/commit/6fb5a69c15e609d170f7b6edcee555d1b4f7379c))
+
+
+
+# [5.5.0](https://github.com/rsuite/rsuite-table/compare/5.4.1...5.5.0) (2022-04-21)
+
+
+### Features
+
+* **HeaderCell:** support renderSortIcon on `<HeaderCell>` ([#341](https://github.com/rsuite/rsuite-table/issues/341)) ([18d6567](https://github.com/rsuite/rsuite-table/commit/18d65673845daea6cd106d3121b2023de293d9b9))
+
+
+### Performance Improvements
+
+* **Table:** improved rendering of scrollbars ([#340](https://github.com/rsuite/rsuite-table/issues/340)) ([2b04ada](https://github.com/rsuite/rsuite-table/commit/2b04adad36f4df4c1224f87c4ab090031cc766b5))
+
+
+
+## [5.4.1](https://github.com/rsuite/rsuite-table/compare/5.4.0...5.4.1) (2022-04-14)
+
+
+### Bug Fixes
+
+* **Table:** fix table height not reset after fillHeight is changed ([#337](https://github.com/rsuite/rsuite-table/issues/337)) ([2156358](https://github.com/rsuite/rsuite-table/commit/215635882124441b261a84c70e44d861f482c0f5))
+
+
+
 # [5.4.0](https://github.com/rsuite/rsuite-table/compare/5.3.6...5.4.0) (2022-04-07)
 
 ### Bug Fixes

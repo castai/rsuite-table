@@ -1,5 +1,7 @@
 ### Virtualized
 
+Virtualize Long Lists
+
 <!--start-code-->
 
 ```js
@@ -41,7 +43,7 @@ const LargeListsTable = () => {
           <Cell dataKey="street" />
         </Column>
 
-        <Column minWidth={200} flexGrow={1}>
+        <Column width={200}>
           <HeaderCell>Company Name</HeaderCell>
           <Cell dataKey="companyName" />
         </Column>
