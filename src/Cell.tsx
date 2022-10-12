@@ -26,10 +26,12 @@ export interface InnerCellProps extends CellProps {
   align?: 'left' | 'center' | 'right';
   verticalAlign?: 'top' | 'middle' | 'bottom';
   isHeaderCell?: boolean;
+  isFooterCell?: boolean;
   width?: number;
   height?: number | ((rowData: RowDataType) => number);
   left?: number;
   headerHeight?: number;
+  footerHeight?: number;
   style?: React.CSSProperties;
   firstColumn?: boolean;
   lastColumn?: boolean;
@@ -72,6 +74,7 @@ const Cell = React.forwardRef((props: InnerCellProps, ref: React.Ref<HTMLDivElem
     width = 0,
     left = 0,
     headerHeight = 36,
+    footerHeight = 0,
     depth = 0,
     height = 36,
     style,
@@ -79,6 +82,7 @@ const Cell = React.forwardRef((props: InnerCellProps, ref: React.Ref<HTMLDivElem
     firstColumn,
     lastColumn,
     isHeaderCell,
+    isFooterCell,
     align,
     children,
     rowData,
@@ -119,11 +123,17 @@ const Cell = React.forwardRef((props: InnerCellProps, ref: React.Ref<HTMLDivElem
       expanded: expanded && isTreeCol,
       first: firstColumn,
       last: lastColumn,
-      rowspan: rowSpan && !isHeaderCell
+      rowspan: rowSpan && !isHeaderCell && !isFooterCell
     })
   );
 
-  const nextHeight = isHeaderCell ? headerHeight : cellHeight;
+  let nextHeight = cellHeight;
+  if (isHeaderCell) {
+    nextHeight = headerHeight;
+  } else if (isFooterCell) {
+    nextHeight = footerHeight;
+  }
+
   const styles = {
     ...predefinedStyle,
     width,
@@ -188,10 +198,17 @@ const Cell = React.forwardRef((props: InnerCellProps, ref: React.Ref<HTMLDivElem
     return null;
   }
 
+  let role = 'gridcell';
+  if (isHeaderCell) {
+    role = 'columnheader';
+  } else if (isFooterCell) {
+    role = 'columnfooter';
+  }
+
   return (
     <div
       ref={ref}
-      role={isHeaderCell ? 'columnheader' : 'gridcell'}
+      role={role}
       {...omit(rest, [...groupKeys, ...columnHandledProps])}
       onClick={onClick}
       className={classes}
@@ -212,10 +229,12 @@ Cell.propTypes = {
   classPrefix: PropTypes.string,
   dataKey: PropTypes.string,
   isHeaderCell: PropTypes.bool,
+  isFooterCell: PropTypes.bool,
   width: PropTypes.number,
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   left: PropTypes.number,
   headerHeight: PropTypes.number,
+  footerHeight: PropTypes.number,
   style: PropTypes.object,
   firstColumn: PropTypes.bool,
   lastColumn: PropTypes.bool,

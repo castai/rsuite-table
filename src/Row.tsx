@@ -9,6 +9,7 @@ export interface RowProps extends StandardProps {
   headerHeight?: number;
   top?: number;
   isHeaderRow?: boolean;
+  isFooterRow?: boolean;
   rowRef?: any;
   rowSpan?: number;
 }
@@ -23,6 +24,7 @@ const Row = React.forwardRef((props: RowProps, ref: React.Ref<HTMLDivElement>) =
     top,
     style,
     isHeaderRow,
+    isFooterRow,
     rowRef,
     children,
     rowSpan,
@@ -31,7 +33,10 @@ const Row = React.forwardRef((props: RowProps, ref: React.Ref<HTMLDivElement>) =
 
   const { translateDOMPositionXY } = useContext(TableContext);
   const { withClassPrefix, merge } = useClassNames(classPrefix);
-  const classes = merge(className, withClassPrefix({ header: isHeaderRow, rowspan: rowSpan }));
+  const classes = merge(
+    className,
+    withClassPrefix({ header: isHeaderRow, rowspan: rowSpan, footer: isFooterRow })
+  );
 
   const styles = {
     minWidth: width,

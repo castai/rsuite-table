@@ -15,6 +15,7 @@ interface PositionProps {
   translateDOMPositionXY: React.MutableRefObject<any>;
   wheelWrapperRef: React.RefObject<HTMLDivElement>;
   headerWrapperRef: React.RefObject<HTMLDivElement>;
+  footerWrapperRef: React.RefObject<HTMLDivElement>;
   affixHeaderWrapperRef: React.RefObject<HTMLDivElement>;
   tableHeaderRef: React.RefObject<HTMLDivElement>;
   scrollX: React.MutableRefObject<number>;
@@ -38,6 +39,7 @@ const usePosition = (props: PositionProps) => {
     translateDOMPositionXY,
     wheelWrapperRef,
     headerWrapperRef,
+    footerWrapperRef,
     affixHeaderWrapperRef,
     tableHeaderRef,
     scrollX,
@@ -143,14 +145,17 @@ const usePosition = (props: PositionProps) => {
         updatePositionByFixedCell();
       } else {
         const headerStyle = {};
-
+        const footerStyle = {};
         translateDOMPositionXY.current(headerStyle as CSSStyleDeclaration, scrollX.current, 0);
+        translateDOMPositionXY.current(footerStyle as CSSStyleDeclaration, scrollX.current, 0);
 
         const headerElement = headerWrapperRef?.current;
+        const footerElement = footerWrapperRef?.current;
         const affixHeaderElement = affixHeaderWrapperRef?.current;
 
         updateWheelElementPosition();
         headerElement && addStyle(headerElement, headerStyle);
+        footerElement && addStyle(footerElement, footerStyle);
 
         if (affixHeaderElement?.hasChildNodes?.()) {
           addStyle(affixHeaderElement?.firstChild as Element, headerStyle);

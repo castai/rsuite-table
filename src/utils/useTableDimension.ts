@@ -21,6 +21,7 @@ interface TableDimensionProps {
   affixHeader?: boolean | number;
   affixHorizontalScrollbar?: boolean | number;
   headerHeight: number;
+  footerHeight: number;
   autoHeight?: boolean;
   fillHeight?: boolean;
   children?: React.ReactNode;
@@ -49,6 +50,7 @@ const useTableDimension = (props: TableDimensionProps) => {
     affixHorizontalScrollbar,
     headerHeight,
     height: heightProp,
+    footerHeight,
     autoHeight,
     minHeight,
     fillHeight,
@@ -74,6 +76,8 @@ const useTableDimension = (props: TableDimensionProps) => {
   const tableOffset = useRef<ElementOffset | null>(null);
 
   const [tableHeight, setTableHeight] = useState(heightProp || 0);
+  const [emptySpaceBelow, setEmptySpaceBelow] = useState(0);
+  const tableHeightWithoutFooter = tableHeight - footerHeight;
 
   const calculateTableContextHeight = useCallback(() => {
     const prevContentHeight = contentHeight.current;
@@ -97,20 +101,23 @@ const useTableDimension = (props: TableDimensionProps) => {
        *  But it will only be calculated when there is a horizontal scroll bar (contentWidth > tableWidth).
        */
       minScrollY.current =
-        -(nextContentHeight - tableHeight) -
+        -(nextContentHeight - tableHeightWithoutFooter) -
         (contentWidth.current > tableWidth.current ? SCROLLBAR_WIDTH : 0);
     }
 
     // If the height of the content area is less than the height of the table, the vertical scroll bar is reset.
-    if (nextContentHeight < tableHeight) {
+    if (nextContentHeight < tableHeightWithoutFooter) {
       onTableScroll?.({ y: 0 });
+      setEmptySpaceBelow(tableHeightWithoutFooter - nextContentHeight);
+    } else if (emptySpaceBelow > 0) {
+      setEmptySpaceBelow(0);
     }
 
     // If the value of scrollTop is greater than the scrollable range, the vertical scroll bar is reset.
     // When Table is set to virtualized, the logic will be entered every time the wheel event is triggered
     // to avoid resetting the scroll bar after scrolling to the bottom, so add the SCROLLBAR_WIDTH value.
     if (
-      Math.abs(scrollY.current) + tableHeight - headerHeight >
+      Math.abs(scrollY.current) + tableHeightWithoutFooter - headerHeight >
       nextContentHeight + SCROLLBAR_WIDTH
     ) {
       onTableScroll?.({ y: scrollY.current });
@@ -154,8 +161,7 @@ const useTableDimension = (props: TableDimensionProps) => {
 
     // The value of SCROLLBAR_WIDTH is subtracted so that the scroll bar does not block the content part.
     // There is no vertical scroll bar after autoHeight.
-    minScrollX.current =
-      -(nextContentWidth - tableWidth.current) - (autoHeight ? 0 : SCROLLBAR_WIDTH);
+    minScrollX.current = -(nextContentWidth - tableWidth.current);
 
     /**
      * If the width of the content area and the number of columns change,
@@ -199,12 +205,12 @@ const useTableDimension = (props: TableDimensionProps) => {
     // When fillHeight is set, a resize listener is added to the table container.
     // And get the height of the container as the height of the table.
     if (fillHeight && tableRef?.current) {
-      setTableHeight(getHeight(tableRef.current.parentNode as Element));
+      setTableHeight(getHeight(tableRef?.current.parentNode?.parentNode as Element));
       containerResizeObserver.current = new ResizeObserver(entries => {
         setTableHeight(entries[0].contentRect.height);
         calculateTableWidth(entries[0].contentRect.width);
       });
-      containerResizeObserver.current.observe(tableRef?.current?.parentNode as Element);
+      containerResizeObserver.current.observe(tableRef?.current?.parentNode?.parentNode as Element);
     } else {
       resizeObserver.current = new ResizeObserver(entries => {
         calculateTableWidth(entries[0].contentRect.width);
@@ -266,7 +272,8 @@ const useTableDimension = (props: TableDimensionProps) => {
     tableOffset,
     getTableHeight,
     setScrollY,
-    setScrollX
+    setScrollX,
+    emptySpaceBelow
   };
 };
 
