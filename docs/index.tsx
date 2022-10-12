@@ -7,7 +7,7 @@ import get from 'lodash/get';
 import without from 'lodash/without';
 import Examples from './Examples';
 import './less/index.less';
-import { Table, Column, Cell, HeaderCell, ColumnGroup } from '../src';
+import { Table, Column, Cell, HeaderCell, FooterCell, ColumnGroup } from '../src';
 import fakeData from './data/users';
 import fakeTreeData from './data/treeData';
 import fakeBigTreeData from './data/bigTreeData';
@@ -54,6 +54,7 @@ function App() {
           ColumnGroup,
           Cell,
           HeaderCell,
+          FooterCell,
           clone,
           createFakeRowObjectData,
           fakeObjectDataListStore,
@@ -177,6 +178,10 @@ function App() {
           {
             title: 'Update Data',
             content: require('./md/UpdateData.md')
+          },
+          {
+            title: 'Table with footer',
+            content: require('./md/TableWithFooter.md')
           }
         ]}
       />

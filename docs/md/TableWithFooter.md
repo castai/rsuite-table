@@ -1,0 +1,95 @@
+### Table with footer
+
+<!--start-code-->
+
+```js
+const App = () => {
+  const [height, setheight] = React.useState(30);
+  const handleChange = event => {
+    const value = parseInt(event.target.value);
+    setheight(value);
+  };
+
+  const data = fakeData.filter((item, index) => index < 50);
+  return (
+    <div>
+      container height: <input type="text" onChange={handleChange} value={height} /> rem
+      <hr />
+      <div style={{ border: '1px solid red', height: `${height}rem` }}>
+        <Table
+          height={400}
+          fillHeight
+          data={data}
+          onRowClick={data => {
+            console.log(data);
+          }}
+          footerHeight={50}
+        >
+          <Column width={70} align="center">
+            <HeaderCell>Id</HeaderCell>
+            <Cell dataKey="id" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={130}>
+            <HeaderCell>First Name</HeaderCell>
+            <Cell dataKey="firstName" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={130}>
+            <HeaderCell>Last Name</HeaderCell>
+            <Cell dataKey="lastName" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={200}>
+            <HeaderCell>City</HeaderCell>
+            <Cell dataKey="city" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={200}>
+            <HeaderCell>Street</HeaderCell>
+            <Cell dataKey="street" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={200}>
+            <HeaderCell>Company Name</HeaderCell>
+            <Cell dataKey="companyName" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={200}>
+            <HeaderCell>Email</HeaderCell>
+            <Cell dataKey="email" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={200}>
+            <HeaderCell>Email</HeaderCell>
+            <Cell dataKey="email" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={200}>
+            <HeaderCell>Email</HeaderCell>
+            <Cell dataKey="email" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+
+          <Column width={200}>
+            <HeaderCell>Email</HeaderCell>
+            <Cell dataKey="email" />
+            <FooterCell><span>F</span></FooterCell>
+          </Column>
+        </Table>
+      </div>
+    </div>
+  );
+};
+ReactDOM.render(<App />);
+```
+
+<!--end-code-->
